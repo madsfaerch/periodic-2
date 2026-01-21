@@ -1,6 +1,7 @@
 import { X } from 'lucide-react';
 import { getCategoryForElement } from '@/data/categories';
 import { usePeriodicTableStore } from '@/store';
+import { OrbitalViewer } from '@/components/orbital';
 
 export function ElementDetails() {
   const { selectedElement, selectElement } = usePeriodicTableStore();
@@ -38,6 +39,14 @@ export function ElementDetails() {
           </button>
         </div>
         <p className="text-sm mt-2 capitalize">{selectedElement.category}</p>
+      </div>
+
+      {/* Orbital visualization */}
+      <div className="p-4 pb-0">
+        <h4 className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-2">
+          Valence Orbital
+        </h4>
+        <OrbitalViewer element={selectedElement} />
       </div>
 
       {/* Properties */}
