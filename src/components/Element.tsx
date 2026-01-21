@@ -39,6 +39,7 @@ export function Element({ element, className }: ElementProps) {
         onBlur={() => setHoveredElement(null)}
         aria-pressed={isSelected}
         aria-label={`${element.name}, symbol ${element.symbol}, atomic number ${element.number}`}
+        data-element={element.number}
       >
         <div className="p-[8cqw] flex flex-col items-start w-full h-full">
           <span className="text-[max(0.4rem,12cqw)] text-muted-foreground leading-tight">

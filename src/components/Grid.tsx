@@ -1,19 +1,10 @@
-import { cn } from '@/lib/utils'
+import { cn } from '@/lib/utils';
 
 interface GridProps {
-  children: React.ReactNode
-  className?: string
+  children: React.ReactNode;
+  className?: string;
 }
 
 export function Grid({ children, className }: GridProps) {
-  return (
-    <div
-      className={cn(
-        'grid grid-cols-18',
-        className
-      )}
-    >
-      {children}
-    </div>
-  )
+  return <div className={cn('grid grid-cols-18', className)}>{children}</div>;
 }

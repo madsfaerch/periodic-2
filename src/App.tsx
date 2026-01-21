@@ -1,8 +1,11 @@
-import { elements } from '@/data'
-import { Grid } from '@/components/Grid'
-import { Element } from '@/components/Element'
+import { Element } from '@/components/Element';
+import { Grid } from '@/components/Grid';
+import { elements } from '@/data';
+import { useGridNavigation } from '@/hooks/useGridNavigation';
 
 function App() {
+  useGridNavigation();
+
   return (
     <div className="min-h-screen bg-background text-foreground p-4">
       <h1 className="text-2xl font-serif font-bold mb-4">Periodic Table</h1>
@@ -12,7 +15,7 @@ function App() {
         ))}
       </Grid>
     </div>
-  )
+  );
 }
 
-export default App
+export default App;
