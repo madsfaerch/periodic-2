@@ -9,7 +9,7 @@ export function Grid({ children, className }: GridProps) {
   return (
     <div
       className={cn(
-        'grid grid-cols-18 gap-0.5',
+        'grid grid-cols-18',
         className
       )}
     >

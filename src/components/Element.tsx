@@ -1,27 +1,34 @@
-import type { Element as ElementType } from '@/data'
-import { cn } from '@/lib/utils'
+import type { Element as ElementType } from "@/data";
+import { cn } from "@/lib/utils";
 
 interface ElementProps {
-  element: ElementType
-  className?: string
+  element: ElementType;
+  className?: string;
 }
 
 export function Element({ element, className }: ElementProps) {
   return (
     <div
       className={cn(
-        'flex flex-col items-center justify-center p-1 aspect-square rounded-sm',
-        'bg-muted hover:bg-accent transition-colors cursor-pointer',
-        className
+        "@container flex flex-col items-center justify-center p-0.5 aspect-square",
+        className,
       )}
       style={{
         gridColumn: element.xpos,
         gridRow: element.ypos,
       }}
     >
-      <span className="text-[0.6rem] text-muted-foreground">{element.number}</span>
-      <span className="text-sm font-semibold">{element.symbol}</span>
-      <span className="text-[0.5rem] text-muted-foreground truncate max-w-full">{element.name}</span>
+      <div className="flex flex-col items-center justify-center w-full h-full rounded-sm bg-muted hover:bg-accent transition-colors cursor-pointer">
+        <span className="text-[max(0.4rem,12cqw)] text-muted-foreground leading-tight">
+          {element.number}
+        </span>
+        <span className="text-[max(0.5rem,24cqw)] font-semibold leading-tight">
+          {element.symbol}
+        </span>
+        <span className="text-[max(0.35rem,10cqw)] text-muted-foreground truncate max-w-full px-0.5 leading-tight">
+          {element.name}
+        </span>
+      </div>
     </div>
-  )
+  );
 }
