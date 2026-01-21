@@ -24,15 +24,21 @@ export function Element({ element, className }: ElementProps) {
         gridRow: element.ypos,
       }}
     >
-      <div
+      <button
+        type="button"
         className={cn(
           "flex flex-col items-start justify-center w-full h-full rounded-sm bg-muted hover:bg-accent transition-colors cursor-pointer",
+          "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
           isSelected && "ring-2 ring-ring",
           isHovered && !isSelected && "ring-1 ring-ring/50",
         )}
         onClick={() => selectElement(isSelected ? null : element)}
         onMouseEnter={() => setHoveredElement(element)}
         onMouseLeave={() => setHoveredElement(null)}
+        onFocus={() => setHoveredElement(element)}
+        onBlur={() => setHoveredElement(null)}
+        aria-pressed={isSelected}
+        aria-label={`${element.name}, symbol ${element.symbol}, atomic number ${element.number}`}
       >
         <div className="p-[8cqw] flex flex-col items-start w-full h-full">
           <span className="text-[max(0.4rem,12cqw)] text-muted-foreground leading-tight">
@@ -45,7 +51,7 @@ export function Element({ element, className }: ElementProps) {
             {element.name}
           </span>
         </div>
-      </div>
+      </button>
     </div>
   );
 }
