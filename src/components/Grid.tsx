@@ -1,10 +1,57 @@
-import { cn } from '@/lib/utils';
+import { cn } from "@/lib/utils";
+import { usePeriodicTableStore } from "@/store";
 
 interface GridProps {
   children: React.ReactNode;
   className?: string;
 }
 
+const groups = Array.from({ length: 18 }, (_, i) => i + 1);
+const periods = Array.from({ length: 7 }, (_, i) => i + 1);
+
 export function Grid({ children, className }: GridProps) {
-  return <div className={cn('grid grid-cols-18', className)}>{children}</div>;
+  const { setHoveredGroup, setHoveredPeriod } = usePeriodicTableStore();
+
+  return (
+    <div className="flex-1 grid grid-cols-[auto_1fr] grid-rows-[auto_1fr]">
+      {/* Empty corner */}
+      <div className="w-6" />
+      {/* Group numbers row */}
+      <div
+        className="grid grid-cols-18"
+        onMouseLeave={() => setHoveredGroup(null)}
+      >
+        {groups.map((group) => (
+          <span
+            key={`group-${group}`}
+            className="flex items-center py-1 justify-center text-xs text-muted-foreground pb-1 cursor-default hover:text-foreground hover:bg-muted rounded transition-colors"
+            onMouseEnter={() => setHoveredGroup(group)}
+          >
+            {group}
+          </span>
+        ))}
+      </div>
+      {/* Period numbers column */}
+      <div
+        className="grid grid-rows-10"
+        onMouseLeave={() => setHoveredPeriod(null)}
+      >
+        {periods.map((period) => (
+          <div key={`period-${period}`} className="flex p-1">
+            <span
+              className="flex items-center justify-center px-2 text-xs text-muted-foreground text-center cursor-default hover:text-foreground hover:bg-muted rounded transition-colors"
+              style={{ gridRow: period }}
+              onMouseEnter={() => setHoveredPeriod(period)}
+            >
+              {period}
+            </span>
+          </div>
+        ))}
+      </div>
+      {/* Element grid */}
+      <div className={cn("grid grid-cols-18 grid-rows-10", className)}>
+        {children}
+      </div>
+    </div>
+  );
 }

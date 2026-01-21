@@ -14,6 +14,8 @@ export function Element({ element, className }: ElementProps) {
     hoveredElement,
     highlightedCategory,
     hoveredCategory,
+    hoveredGroup,
+    hoveredPeriod,
     selectElement,
     setHoveredElement,
   } = usePeriodicTableStore();
@@ -24,7 +26,12 @@ export function Element({ element, className }: ElementProps) {
   const activeCategory = highlightedCategory ?? hoveredCategory;
   const isInActiveCategory =
     !activeCategory || element.category.includes(activeCategory);
-  const isDimmed = activeCategory && !isInActiveCategory;
+  const isInHoveredGroup = !hoveredGroup || element.group === hoveredGroup;
+  const isInHoveredPeriod = !hoveredPeriod || element.period === hoveredPeriod;
+  const isDimmed =
+    (activeCategory && !isInActiveCategory) ||
+    (hoveredGroup && !isInHoveredGroup) ||
+    (hoveredPeriod && !isInHoveredPeriod);
 
   return (
     <div
