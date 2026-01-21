@@ -1,42 +1,63 @@
+import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from '@/components/ui/tooltip';
 import { categories } from '@/data/categories';
 import { cn } from '@/lib/utils';
 import { usePeriodicTableStore } from '@/store';
 
 export function CategorySelector() {
-  const { highlightedCategory, setHighlightedCategory } =
+  const { highlightedCategory, setHighlightedCategory, setHoveredCategory } =
     usePeriodicTableStore();
 
   return (
-    <div className="flex flex-wrap gap-2">
-      {categories.map((category) => {
-        const isActive = highlightedCategory === category.id;
+    <TooltipProvider>
+      <ToggleGroup
+        type="single"
+        value={highlightedCategory ?? ''}
+        onValueChange={(value) => setHighlightedCategory(value || null)}
+        variant="outline"
+      >
+        {categories.map((category) => {
+          const isActive = highlightedCategory === category.id;
+          const Icon = category.icon;
 
-        return (
-          <button
-            key={category.id}
-            type="button"
-            onClick={() =>
-              setHighlightedCategory(isActive ? null : category.id)
-            }
-            className={cn(
-              'px-3 py-1.5 rounded-md text-sm font-medium transition-all',
-              'border border-transparent',
-              'hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
-              {
-                'ring-2 ring-ring': isActive,
-                'opacity-70 hover:opacity-100': !isActive,
-              },
-            )}
-            style={{
-              backgroundColor: category.color,
-              color: '#1a1a1a',
-            }}
-            aria-pressed={isActive}
-          >
-            {category.name}
-          </button>
-        );
-      })}
-    </div>
+          return (
+            <Tooltip key={category.id}>
+              <TooltipTrigger asChild>
+                <ToggleGroupItem
+                  value={category.id}
+                  aria-label={category.name}
+                  className={cn('transition-colors', 'hover:text-neutral-900', {
+                    'text-neutral-900': isActive,
+                  })}
+                  style={{
+                    backgroundColor: isActive ? category.color : undefined,
+                  }}
+                  onMouseEnter={(e) => {
+                    setHoveredCategory(category.id);
+                    if (!isActive) {
+                      e.currentTarget.style.backgroundColor = category.color;
+                    }
+                  }}
+                  onMouseLeave={(e) => {
+                    setHoveredCategory(null);
+                    if (!isActive) {
+                      e.currentTarget.style.backgroundColor = '';
+                    }
+                  }}
+                >
+                  <Icon className="size-4" />
+                </ToggleGroupItem>
+              </TooltipTrigger>
+              <TooltipContent side="bottom">{category.name}</TooltipContent>
+            </Tooltip>
+          );
+        })}
+      </ToggleGroup>
+    </TooltipProvider>
   );
 }
