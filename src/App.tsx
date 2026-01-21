@@ -1,3 +1,4 @@
+import { CategorySelector } from '@/components/CategorySelector';
 import { Element } from '@/components/Element';
 import { Grid } from '@/components/Grid';
 import { elements } from '@/data';
@@ -9,11 +10,14 @@ function App() {
   return (
     <div className="min-h-screen bg-background text-foreground p-4">
       <h1 className="text-2xl font-serif font-bold mb-4">Periodic Table</h1>
-      <Grid>
-        {elements.map((element) => (
-          <Element key={element.number} element={element} />
-        ))}
-      </Grid>
+      <CategorySelector />
+      <div className="mt-4">
+        <Grid>
+          {elements.map((element) => (
+            <Element key={element.number} element={element} />
+          ))}
+        </Grid>
+      </div>
     </div>
   );
 }
