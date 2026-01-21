@@ -26,7 +26,7 @@ export function OrbitalViewer({ element, className }: OrbitalViewerProps) {
       <div className="w-full shadow aspect-square bg-stone-100 rounded-lg overflow-hidden">
         <Canvas camera={{ position: [0, 0, 4], fov: 50 }}>
           <Suspense fallback={null}>
-            <OrbitalPointCloud orbital={orbital} pointCount={10_000} />
+            <OrbitalPointCloud orbital={orbital} />
           </Suspense>
           <OrbitControls
             enableZoom={true}
