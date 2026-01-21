@@ -1,9 +1,18 @@
 @import "tailwindcss";
 @import "tw-animate-css";
 
+/* Fonts */
+@import "@fontsource/jetbrains-mono/400.css";
+@import "@fontsource/jetbrains-mono/500.css";
+@import "@fontsource/jetbrains-mono/600.css";
+@import "@fontsource/jetbrains-mono/700.css";
+@import "@fontsource/dm-serif-text/400.css";
+
 @custom-variant dark (&:is(.dark *));
 
 @theme inline {
+  --font-sans: "JetBrains Mono", monospace;
+  --font-serif: "DM Serif Text", serif;
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
@@ -118,6 +127,6 @@
     @apply border-border outline-ring/50;
   }
   body {
-    @apply bg-background text-foreground;
+    @apply bg-background text-foreground font-sans;
   }
 }
