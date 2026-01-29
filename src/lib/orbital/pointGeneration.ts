@@ -31,7 +31,7 @@ async function loadOrbitalPoints(orbital: ValenceOrbital): Promise<OrbitalPoints
   // Start loading
   const loadPromise = (async () => {
     try {
-      const response = await fetch(`/orbitals/${key}.json`);
+      const response = await fetch(`${import.meta.env.BASE_URL}orbitals/${key}.json`);
       if (!response.ok) {
         throw new Error(`Failed to load orbital ${key}`);
       }
