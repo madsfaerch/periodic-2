@@ -2,15 +2,18 @@ import { X } from 'lucide-react';
 import { getCategoryForElement } from '@/data/categories';
 import { usePeriodicTableStore } from '@/store';
 import { OrbitalViewer } from '@/components/orbital';
-import { heatmapPropertyMap } from '@/lib/heatmap';
+import { propertyMap } from '@/lib/heatmap';
 import { cn } from '@/lib/utils';
 
-export function ElementDetails() {
+export function ElementDetails({ condensed = false }: { condensed?: boolean }) {
   const { selectedElement, selectElement } = usePeriodicTableStore();
 
   if (!selectedElement) {
     return (
-      <div className="w-80 border border-border rounded-lg p-6 flex items-center justify-center text-muted-foreground">
+      <div className={cn(
+        'border border-border rounded-lg p-6 flex items-center justify-center text-muted-foreground',
+        condensed ? 'w-full' : 'w-80',
+      )}>
         Select an element to view details
       </div>
     );
@@ -19,7 +22,10 @@ export function ElementDetails() {
   const category = getCategoryForElement(selectedElement.category);
 
   return (
-    <div className="w-80 border border-border rounded-lg overflow-hidden">
+    <div className={cn(
+      'border border-border rounded-lg overflow-hidden',
+      condensed ? 'w-full' : 'w-80',
+    )}>
       {/* Header with element symbol */}
       <div
         className="p-4 text-neutral-900"
@@ -40,7 +46,13 @@ export function ElementDetails() {
             <X className="size-5" />
           </button>
         </div>
-        <p className="text-sm mt-2 capitalize">{selectedElement.category}</p>
+        <Property
+          label="Category"
+          value={selectedElement.category}
+          propertyKey="category"
+          className="mt-2 text-sm capitalize"
+          dark
+        />
       </div>
 
       {/* Orbital visualization */}
@@ -59,10 +71,10 @@ export function ElementDetails() {
             value={selectedElement.atomic_mass.toFixed(4)}
             propertyKey="atomic_mass"
           />
-          <Property label="Phase" value={selectedElement.phase} />
-          <Property label="Group" value={selectedElement.group} />
-          <Property label="Period" value={selectedElement.period} />
-          <Property label="Block" value={selectedElement.block.toUpperCase()} />
+          <Property label="Phase" value={selectedElement.phase} propertyKey="phase" />
+          <Property label="Group" value={selectedElement.group} propertyKey="group" />
+          <Property label="Period" value={selectedElement.period} propertyKey="period" />
+          <Property label="Block" value={selectedElement.block.toUpperCase()} propertyKey="block" />
           <Property
             label="Density"
             value={
@@ -86,6 +98,21 @@ export function ElementDetails() {
             propertyKey="electronegativity_pauling"
           />
           <Property
+            label="Atomic Radius"
+            value={selectedElement.atomic_radius ? `${selectedElement.atomic_radius} pm` : '—'}
+            propertyKey="atomic_radius"
+          />
+          <Property
+            label="Covalent Radius"
+            value={selectedElement.covalent_radius ? `${selectedElement.covalent_radius} pm` : '—'}
+            propertyKey="covalent_radius"
+          />
+          <Property
+            label="VdW Radius"
+            value={selectedElement.van_der_waals_radius ? `${selectedElement.van_der_waals_radius} pm` : '—'}
+            propertyKey="van_der_waals_radius"
+          />
+          <Property
             label="Electron Config"
             value={selectedElement.electron_configuration_semantic}
             className="col-span-2"
@@ -93,15 +120,17 @@ export function ElementDetails() {
         </div>
 
         {/* Summary */}
-        <div>
-          <h4 className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-1">
-            Summary
-          </h4>
-          <p className="text-sm leading-relaxed">{selectedElement.summary}</p>
-        </div>
+        {!condensed && (
+          <div>
+            <h4 className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-1">
+              Summary
+            </h4>
+            <p className="text-sm leading-relaxed">{selectedElement.summary}</p>
+          </div>
+        )}
 
         {/* Discovered by */}
-        {selectedElement.discovered_by && (
+        {!condensed && selectedElement.discovered_by && (
           <div>
             <h4 className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-1">
               Discovered by
@@ -119,22 +148,27 @@ function Property({
   value,
   className,
   propertyKey,
+  dark,
 }: {
   label: string;
   value: string | number;
   className?: string;
   propertyKey?: string;
+  dark?: boolean;
 }) {
   const { activeProperty, setActiveProperty } = usePeriodicTableStore();
-  const isClickable = propertyKey != null && heatmapPropertyMap.has(propertyKey);
+  const isClickable = propertyKey != null && propertyMap.has(propertyKey);
   const isActive = propertyKey != null && activeProperty === propertyKey;
 
   return (
     <div
       className={cn(
         className,
-        isClickable && 'cursor-pointer rounded px-1 -mx-1 transition-colors hover:bg-muted/50',
-        isActive && 'bg-muted ring-1 ring-ring/30 rounded px-1 -mx-1',
+        isClickable && 'cursor-pointer rounded px-1 -mx-1 transition-colors',
+        isClickable && !dark && 'hover:bg-muted/50',
+        isClickable && dark && 'hover:bg-black/10',
+        isActive && !dark && 'bg-muted ring-1 ring-ring/30 rounded px-1 -mx-1',
+        isActive && dark && 'bg-black/15 ring-1 ring-black/20 rounded px-1 -mx-1',
       )}
       onClick={
         isClickable
@@ -144,7 +178,7 @@ function Property({
       role={isClickable ? 'button' : undefined}
       tabIndex={isClickable ? 0 : undefined}
     >
-      <dt className="text-xs text-muted-foreground">
+      <dt className={cn('text-xs', dark ? 'text-neutral-700' : 'text-muted-foreground')}>
         {label}
         {isClickable && (
           <span className="ml-1 text-[10px] opacity-50">{isActive ? '✕' : '◉'}</span>

@@ -1,8 +1,11 @@
 import type { Element as ElementType } from '@/data';
 import { getCategoryForElement } from '@/data/categories';
-import { getElementHeatmapColor } from '@/lib/heatmap';
+import { getElementPropertyColor, propertyMap, normalize } from '@/lib/heatmap';
+import type { NumericPropertyConfig } from '@/lib/heatmap';
 import { cn } from '@/lib/utils';
 import { usePeriodicTableStore } from '@/store';
+
+const RADIUS_KEYS = new Set(['atomic_radius', 'covalent_radius', 'van_der_waals_radius']);
 
 interface ElementProps {
   element: ElementType;
@@ -13,8 +16,6 @@ export function Element({ element, className }: ElementProps) {
   const {
     selectedElement,
     hoveredElement,
-    highlightedCategory,
-    hoveredCategory,
     hoveredGroup,
     hoveredPeriod,
     activeProperty,
@@ -25,19 +26,29 @@ export function Element({ element, className }: ElementProps) {
   const isHovered = hoveredElement?.number === element.number;
 
   const category = getCategoryForElement(element.category);
-  const activeCategory = highlightedCategory ?? hoveredCategory;
-  const isInActiveCategory =
-    !activeCategory || element.category.includes(activeCategory);
   const isInHoveredGroup = !hoveredGroup || element.group === hoveredGroup;
   const isInHoveredPeriod = !hoveredPeriod || element.period === hoveredPeriod;
-  const heatmapBg = activeProperty
-    ? getElementHeatmapColor(element, activeProperty)
+
+  // Active property coloring
+  const propertyBg = activeProperty
+    ? getElementPropertyColor(element, activeProperty)
     : null;
-  const hasNoValue = activeProperty != null && heatmapBg == null;
+  const config = activeProperty ? propertyMap.get(activeProperty) : null;
+  const hasNoValue =
+    activeProperty != null && config?.kind === 'numeric' && propertyBg == null;
+
+  // Highlight matching group value when a group property is active and an element is selected
+  const selectedElement_ = usePeriodicTableStore((s) => s.selectedElement);
+  let isGroupDimmed = false;
+  if (config?.kind === 'group' && selectedElement_) {
+    const selectedGroup = config.getGroup(selectedElement_);
+    const thisGroup = config.getGroup(element);
+    isGroupDimmed = selectedGroup !== thisGroup;
+  }
 
   const isDimmed =
     hasNoValue ||
-    (activeCategory && !isInActiveCategory) ||
+    isGroupDimmed ||
     (hoveredGroup && !isInHoveredGroup) ||
     (hoveredPeriod && !isInHoveredPeriod);
 
@@ -64,7 +75,7 @@ export function Element({ element, className }: ElementProps) {
           },
         )}
         style={{
-          backgroundColor: heatmapBg ?? category?.color ?? 'hsl(var(--muted))',
+          backgroundColor: propertyBg ?? category?.color ?? 'hsl(var(--muted))',
         }}
         onClick={() => selectElement(isSelected ? null : element)}
         onMouseEnter={() => setHoveredElement(element)}
@@ -75,6 +86,32 @@ export function Element({ element, className }: ElementProps) {
         aria-label={`${element.name}, symbol ${element.symbol}, atomic number ${element.number}, ${element.category}`}
         data-element={element.number}
       >
+        {activeProperty && RADIUS_KEYS.has(activeProperty) && config?.kind === 'numeric' ? (() => {
+          const numConfig = config as NumericPropertyConfig;
+          const value = numConfig.getValue(element);
+          const t = normalize(value, numConfig);
+          const sizePct = t != null ? 15 + t * 65 : 0;
+          return (
+            <div className="relative w-full" style={{ paddingBottom: '100%' }}>
+              <div className="absolute inset-0 flex items-center justify-center">
+                {t != null && (
+                  <div
+                    className="rounded-full absolute"
+                    style={{
+                      width: `${sizePct}%`,
+                      aspectRatio: '1',
+                      backgroundColor: category?.color ?? 'hsl(var(--muted))',
+                      opacity: 0.7,
+                    }}
+                  />
+                )}
+                <span className="text-[max(0.5rem,20cqw)] font-semibold text-neutral-900 relative z-10">
+                  {element.symbol}
+                </span>
+              </div>
+            </div>
+          );
+        })() : (
         <div className="p-[8cqw] flex flex-col items-start w-full h-full">
           <span className="text-[max(0.4rem,12cqw)] text-neutral-700 leading-tight">
             {element.number}
@@ -86,6 +123,7 @@ export function Element({ element, className }: ElementProps) {
             {element.name}
           </span>
         </div>
+        )}
       </button>
     </div>
   );

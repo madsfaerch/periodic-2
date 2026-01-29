@@ -36,6 +36,9 @@ export interface Element {
     attribution: string;
   };
   block: string;
+  atomic_radius: number | null;
+  covalent_radius: number | null;
+  van_der_waals_radius: number | null;
 }
 
 export interface PeriodicTableData {
