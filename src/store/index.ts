@@ -8,12 +8,14 @@ interface PeriodicTableState {
   hoveredCategory: string | null;
   hoveredGroup: number | null;
   hoveredPeriod: number | null;
+  activeProperty: string | null;
   selectElement: (element: Element | null) => void;
   setHoveredElement: (element: Element | null) => void;
   setHighlightedCategory: (category: string | null) => void;
   setHoveredCategory: (category: string | null) => void;
   setHoveredGroup: (group: number | null) => void;
   setHoveredPeriod: (period: number | null) => void;
+  setActiveProperty: (property: string | null) => void;
 }
 
 export const usePeriodicTableStore = create<PeriodicTableState>((set) => ({
@@ -23,10 +25,12 @@ export const usePeriodicTableStore = create<PeriodicTableState>((set) => ({
   hoveredCategory: null,
   hoveredGroup: null,
   hoveredPeriod: null,
+  activeProperty: null,
   selectElement: (element) => set({ selectedElement: element }),
   setHoveredElement: (element) => set({ hoveredElement: element }),
   setHighlightedCategory: (category) => set({ highlightedCategory: category }),
   setHoveredCategory: (category) => set({ hoveredCategory: category }),
   setHoveredGroup: (group) => set({ hoveredGroup: group }),
   setHoveredPeriod: (period) => set({ hoveredPeriod: period }),
+  setActiveProperty: (property) => set({ activeProperty: property }),
 }));

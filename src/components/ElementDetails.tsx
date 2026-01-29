@@ -2,6 +2,8 @@ import { X } from 'lucide-react';
 import { getCategoryForElement } from '@/data/categories';
 import { usePeriodicTableStore } from '@/store';
 import { OrbitalViewer } from '@/components/orbital';
+import { heatmapPropertyMap } from '@/lib/heatmap';
+import { cn } from '@/lib/utils';
 
 export function ElementDetails() {
   const { selectedElement, selectElement } = usePeriodicTableStore();
@@ -55,6 +57,7 @@ export function ElementDetails() {
           <Property
             label="Atomic Mass"
             value={selectedElement.atomic_mass.toFixed(4)}
+            propertyKey="atomic_mass"
           />
           <Property label="Phase" value={selectedElement.phase} />
           <Property label="Group" value={selectedElement.group} />
@@ -65,18 +68,22 @@ export function ElementDetails() {
             value={
               selectedElement.density ? `${selectedElement.density} g/cm³` : '—'
             }
+            propertyKey="density"
           />
           <Property
             label="Melting Point"
             value={selectedElement.melt ? `${selectedElement.melt} K` : '—'}
+            propertyKey="melt"
           />
           <Property
             label="Boiling Point"
             value={selectedElement.boil ? `${selectedElement.boil} K` : '—'}
+            propertyKey="boil"
           />
           <Property
             label="Electronegativity"
             value={selectedElement.electronegativity_pauling ?? '—'}
+            propertyKey="electronegativity_pauling"
           />
           <Property
             label="Electron Config"
@@ -111,14 +118,38 @@ function Property({
   label,
   value,
   className,
+  propertyKey,
 }: {
   label: string;
   value: string | number;
   className?: string;
+  propertyKey?: string;
 }) {
+  const { activeProperty, setActiveProperty } = usePeriodicTableStore();
+  const isClickable = propertyKey != null && heatmapPropertyMap.has(propertyKey);
+  const isActive = propertyKey != null && activeProperty === propertyKey;
+
   return (
-    <div className={className}>
-      <dt className="text-xs text-muted-foreground">{label}</dt>
+    <div
+      className={cn(
+        className,
+        isClickable && 'cursor-pointer rounded px-1 -mx-1 transition-colors hover:bg-muted/50',
+        isActive && 'bg-muted ring-1 ring-ring/30 rounded px-1 -mx-1',
+      )}
+      onClick={
+        isClickable
+          ? () => setActiveProperty(isActive ? null : propertyKey!)
+          : undefined
+      }
+      role={isClickable ? 'button' : undefined}
+      tabIndex={isClickable ? 0 : undefined}
+    >
+      <dt className="text-xs text-muted-foreground">
+        {label}
+        {isClickable && (
+          <span className="ml-1 text-[10px] opacity-50">{isActive ? '✕' : '◉'}</span>
+        )}
+      </dt>
       <dd className="font-medium">{value}</dd>
     </div>
   );

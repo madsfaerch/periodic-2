@@ -1,5 +1,6 @@
 import type { Element as ElementType } from '@/data';
 import { getCategoryForElement } from '@/data/categories';
+import { getElementHeatmapColor } from '@/lib/heatmap';
 import { cn } from '@/lib/utils';
 import { usePeriodicTableStore } from '@/store';
 
@@ -16,6 +17,7 @@ export function Element({ element, className }: ElementProps) {
     hoveredCategory,
     hoveredGroup,
     hoveredPeriod,
+    activeProperty,
     selectElement,
     setHoveredElement,
   } = usePeriodicTableStore();
@@ -28,7 +30,13 @@ export function Element({ element, className }: ElementProps) {
     !activeCategory || element.category.includes(activeCategory);
   const isInHoveredGroup = !hoveredGroup || element.group === hoveredGroup;
   const isInHoveredPeriod = !hoveredPeriod || element.period === hoveredPeriod;
+  const heatmapBg = activeProperty
+    ? getElementHeatmapColor(element, activeProperty)
+    : null;
+  const hasNoValue = activeProperty != null && heatmapBg == null;
+
   const isDimmed =
+    hasNoValue ||
     (activeCategory && !isInActiveCategory) ||
     (hoveredGroup && !isInHoveredGroup) ||
     (hoveredPeriod && !isInHoveredPeriod);
@@ -56,7 +64,7 @@ export function Element({ element, className }: ElementProps) {
           },
         )}
         style={{
-          backgroundColor: category?.color ?? 'hsl(var(--muted))',
+          backgroundColor: heatmapBg ?? category?.color ?? 'hsl(var(--muted))',
         }}
         onClick={() => selectElement(isSelected ? null : element)}
         onMouseEnter={() => setHoveredElement(element)}
