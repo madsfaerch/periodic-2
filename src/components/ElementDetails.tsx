@@ -80,7 +80,7 @@ export function ElementDetails({ condensed = false }: { condensed?: boolean }) {
           onClick={() => setOrbitalModalOpen(false)}
         >
           <div
-            className="relative w-[90vmin] max-w-lg flex flex-col items-center p-6"
+            className="relative w-[90vmin] max-w-[80vh] flex flex-col items-center p-6"
             onClick={(e) => e.stopPropagation()}
           >
             <button

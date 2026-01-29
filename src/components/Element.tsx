@@ -75,9 +75,11 @@ export function Element({ element, className }: ElementProps) {
           },
         )}
         style={{
-          backgroundColor: propertyBg ?? category?.color ?? 'hsl(var(--muted))',
+          backgroundColor: activeProperty && RADIUS_KEYS.has(activeProperty)
+            ? 'hsl(var(--muted))'
+            : propertyBg ?? category?.color ?? 'hsl(var(--muted))',
         }}
-        onClick={() => selectElement(isSelected ? null : element)}
+        onClick={() => selectElement(element)}
         onMouseEnter={() => setHoveredElement(element)}
         onMouseLeave={() => setHoveredElement(null)}
         onFocus={() => setHoveredElement(element)}
@@ -121,6 +123,9 @@ export function Element({ element, className }: ElementProps) {
           </span>
           <span className="text-[max(0.35rem,10cqw)] text-neutral-700 truncate max-w-full px-0.5 leading-tight">
             {element.name}
+          </span>
+          <span className="text-[max(0.3rem,8cqw)] text-neutral-500 leading-tight mt-auto">
+            {element.atomic_mass.toFixed(2)}
           </span>
         </div>
         )}
