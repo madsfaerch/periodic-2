@@ -5,6 +5,7 @@ import { defineConfig } from 'vite';
 
 // https://vite.dev/config/
 export default defineConfig({
+  base: process.env.BASE_URL || '/',
   server: {
     allowedHosts: ['madss-mac-mini.tail9c3073.ts.net'],
   },

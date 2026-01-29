@@ -26,7 +26,16 @@ export const usePeriodicTableStore = create<PeriodicTableState>((set) => ({
   activeProperty: null,
   viewMode: 'grid',
   sortDirection: 'asc',
-  selectElement: (element) => set({ selectedElement: element }),
+  selectElement: (element) => {
+    set({ selectedElement: element });
+    const url = new URL(window.location.href);
+    if (element) {
+      url.searchParams.set('element', element.symbol);
+    } else {
+      url.searchParams.delete('element');
+    }
+    window.history.replaceState(null, '', url.toString());
+  },
   setHoveredElement: (element) => set({ hoveredElement: element }),
   setHoveredGroup: (group) => set({ hoveredGroup: group }),
   setHoveredPeriod: (period) => set({ hoveredPeriod: period }),

@@ -15,8 +15,10 @@ function App() {
   const setViewMode = usePeriodicTableStore((s) => s.setViewMode);
 
   useEffect(() => {
-    const hydrogen = elements.find((e) => e.number === 1);
-    if (hydrogen) selectElement(hydrogen);
+    const params = new URLSearchParams(window.location.search);
+    const symbol = params.get('element');
+    const fromUrl = symbol ? elements.find((e) => e.symbol === symbol) : null;
+    selectElement(fromUrl ?? elements.find((e) => e.number === 1) ?? null);
   }, [selectElement]);
 
   return (

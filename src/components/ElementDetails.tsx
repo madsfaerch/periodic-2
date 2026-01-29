@@ -1,12 +1,20 @@
 import { X } from 'lucide-react';
+import { useState, useCallback, useMemo } from 'react';
 import { getCategoryForElement } from '@/data/categories';
 import { usePeriodicTableStore } from '@/store';
 import { OrbitalViewer } from '@/components/orbital';
 import { propertyMap } from '@/lib/heatmap';
 import { cn } from '@/lib/utils';
+import { parseValenceOrbital, getOrbitalDescription } from '@/lib/orbital/orbitalParser';
 
 export function ElementDetails({ condensed = false }: { condensed?: boolean }) {
   const { selectedElement, selectElement } = usePeriodicTableStore();
+  const [orbitalModalOpen, setOrbitalModalOpen] = useState(false);
+  const orbital = useMemo(
+    () => selectedElement ? parseValenceOrbital(selectedElement.electron_configuration_semantic) : null,
+    [selectedElement?.electron_configuration_semantic],
+  );
+  const orbitalDescription = orbital ? getOrbitalDescription(orbital) : '';
 
   if (!selectedElement) {
     return (
@@ -26,25 +34,35 @@ export function ElementDetails({ condensed = false }: { condensed?: boolean }) {
       'border border-border rounded-lg overflow-hidden',
       condensed ? 'w-full' : 'w-80',
     )}>
-      {/* Header with element symbol */}
+      {/* Header with element symbol + mini orbital */}
       <div
         className="p-4 text-neutral-900"
         style={{ backgroundColor: category?.color ?? 'hsl(var(--muted))' }}
       >
         <div className="flex items-start justify-between">
-          <div>
+          <div className="flex-1 min-w-0">
             <span className="text-sm">{selectedElement.number}</span>
             <h2 className="text-5xl font-bold">{selectedElement.symbol}</h2>
             <h3 className="text-xl font-semibold">{selectedElement.name}</h3>
           </div>
-          <button
-            type="button"
-            onClick={() => selectElement(null)}
-            className="p-1 hover:bg-black/10 rounded transition-colors"
-            aria-label="Close details"
-          >
-            <X className="size-5" />
-          </button>
+          <div className="flex flex-col items-end gap-1">
+            <button
+              type="button"
+              onClick={() => selectElement(null)}
+              className="p-1 hover:bg-black/10 rounded transition-colors"
+              aria-label="Close details"
+            >
+              <X className="size-5" />
+            </button>
+            <button
+              type="button"
+              onClick={() => setOrbitalModalOpen(true)}
+              className="w-20 h-20 rounded-lg overflow-hidden shadow-md hover:shadow-lg transition-shadow cursor-pointer"
+              aria-label="View orbital"
+            >
+              <OrbitalViewer element={selectedElement} compact />
+            </button>
+          </div>
         </div>
         <Property
           label="Category"
@@ -55,13 +73,34 @@ export function ElementDetails({ condensed = false }: { condensed?: boolean }) {
         />
       </div>
 
-      {/* Orbital visualization */}
-      <div className="p-4 pb-0">
-        <h4 className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-2">
-          Valence Orbital
-        </h4>
-        <OrbitalViewer element={selectedElement} />
-      </div>
+      {/* Orbital modal */}
+      {orbitalModalOpen && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/70"
+          onClick={() => setOrbitalModalOpen(false)}
+        >
+          <div
+            className="relative w-[90vmin] max-w-lg flex flex-col items-center p-6"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <button
+              type="button"
+              onClick={() => setOrbitalModalOpen(false)}
+              className="absolute top-2 right-2 p-1 text-white/70 hover:text-white rounded transition-colors"
+              aria-label="Close modal"
+            >
+              <X className="size-6" />
+            </button>
+            <OrbitalViewer element={selectedElement} className="w-full" />
+            <div className="mt-3 text-center">
+              <p className="text-white text-lg font-bold">
+                {selectedElement.symbol} — {selectedElement.name}
+              </p>
+              <p className="text-white/60 text-sm mt-1">{orbitalDescription}</p>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Properties */}
       <div className="p-4 space-y-4">

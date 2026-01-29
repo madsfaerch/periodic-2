@@ -12,9 +12,10 @@ import type { Element } from "@/data";
 interface OrbitalViewerProps {
   element: Element;
   className?: string;
+  compact?: boolean;
 }
 
-export function OrbitalViewer({ element, className }: OrbitalViewerProps) {
+export function OrbitalViewer({ element, className, compact }: OrbitalViewerProps) {
   const orbital = useMemo(() => {
     return parseValenceOrbital(element.electron_configuration_semantic);
   }, [element.electron_configuration_semantic]);
@@ -29,7 +30,8 @@ export function OrbitalViewer({ element, className }: OrbitalViewerProps) {
             <OrbitalPointCloud orbital={orbital} />
           </Suspense>
           <OrbitControls
-            enableZoom={true}
+            enableZoom={!compact}
+            enableRotate={!compact}
             enablePan={false}
             minDistance={2}
             maxDistance={8}
@@ -38,9 +40,11 @@ export function OrbitalViewer({ element, className }: OrbitalViewerProps) {
           />
         </Canvas>
       </div>
-      <p className="text-xs text-muted-foreground mt-2 text-center">
-        {description}
-      </p>
+      {!compact && (
+        <p className="text-xs text-muted-foreground mt-2 text-center">
+          {description}
+        </p>
+      )}
     </div>
   );
 }
