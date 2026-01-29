@@ -97,7 +97,7 @@ export function Element({ element, className }: ElementProps) {
           backgroundColor: bgColor,
           borderRadius: isRadiusMode ? '50%' : '2px',
         }}
-        transition={{ duration: 0.5, ease: 'easeInOut' }}
+        transition={{ duration: 0.5, ease: 'linear' }}
         onClick={() => selectElement(element)}
         onMouseEnter={() => setHoveredElement(element)}
         onMouseLeave={() => setHoveredElement(null)}
@@ -122,7 +122,7 @@ export function Element({ element, className }: ElementProps) {
             height: isRadiusMode ? `${radiusSizePct}%` : '142%',
             opacity: isRadiusMode ? 0.7 : 1,
           }}
-          transition={{ duration: 0.5, ease: 'easeInOut' }}
+          transition={{ duration: 0.5, ease: 'linear' }}
         />
 
         {/* Content layer */}
