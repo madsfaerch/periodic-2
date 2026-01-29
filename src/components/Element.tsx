@@ -1,3 +1,5 @@
+import { useMemo } from 'react';
+import { motion, AnimatePresence } from 'motion/react';
 import type { Element as ElementType } from '@/data';
 import { getCategoryForElement } from '@/data/categories';
 import { getElementPropertyColor, propertyMap, normalize } from '@/lib/heatmap';
@@ -26,6 +28,7 @@ export function Element({ element, className }: ElementProps) {
   const isHovered = hoveredElement?.number === element.number;
 
   const category = getCategoryForElement(element.category);
+  const categoryColor = category?.color ?? 'hsl(var(--muted))';
   const isInHoveredGroup = !hoveredGroup || element.group === hoveredGroup;
   const isInHoveredPeriod = !hoveredPeriod || element.period === hoveredPeriod;
 
@@ -36,6 +39,17 @@ export function Element({ element, className }: ElementProps) {
   const config = activeProperty ? propertyMap.get(activeProperty) : null;
   const hasNoValue =
     activeProperty != null && config?.kind === 'numeric' && propertyBg == null;
+
+  const isRadiusMode = !!(activeProperty && RADIUS_KEYS.has(activeProperty));
+
+  // Radius circle size
+  const radiusSizePct = useMemo(() => {
+    if (!isRadiusMode || config?.kind !== 'numeric') return 0;
+    const numConfig = config as NumericPropertyConfig;
+    const value = numConfig.getValue(element);
+    const t = normalize(value, numConfig);
+    return t != null ? 15 + t * 65 : 0;
+  }, [isRadiusMode, config, element]);
 
   // Highlight matching group value when a group property is active and an element is selected
   const selectedElement_ = usePeriodicTableStore((s) => s.selectedElement);
@@ -52,6 +66,11 @@ export function Element({ element, className }: ElementProps) {
     (hoveredGroup && !isInHoveredGroup) ||
     (hoveredPeriod && !isInHoveredPeriod);
 
+  // Background: in radius mode, animate from category color to transparent
+  const bgColor = isRadiusMode
+    ? 'transparent'
+    : propertyBg ?? categoryColor;
+
   return (
     <div
       className={cn(
@@ -63,10 +82,10 @@ export function Element({ element, className }: ElementProps) {
         gridRow: element.ypos,
       }}
     >
-      <button
+      <motion.button
         type="button"
         className={cn(
-          'flex flex-col items-start justify-center w-full h-full rounded-sm transition-all cursor-pointer',
+          'relative flex flex-col items-start justify-center w-full h-full cursor-pointer overflow-hidden',
           'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
           {
             'ring-2 ring-ring': isSelected,
@@ -74,11 +93,11 @@ export function Element({ element, className }: ElementProps) {
             'opacity-20': isDimmed,
           },
         )}
-        style={{
-          backgroundColor: activeProperty && RADIUS_KEYS.has(activeProperty)
-            ? 'hsl(var(--muted))'
-            : propertyBg ?? category?.color ?? 'hsl(var(--muted))',
+        animate={{
+          backgroundColor: bgColor,
+          borderRadius: isRadiusMode ? '50%' : '2px',
         }}
+        transition={{ duration: 0.5, ease: 'easeInOut' }}
         onClick={() => selectElement(element)}
         onMouseEnter={() => setHoveredElement(element)}
         onMouseLeave={() => setHoveredElement(null)}
@@ -88,48 +107,66 @@ export function Element({ element, className }: ElementProps) {
         aria-label={`${element.name}, symbol ${element.symbol}, atomic number ${element.number}, ${element.category}`}
         data-element={element.number}
       >
-        {activeProperty && RADIUS_KEYS.has(activeProperty) && config?.kind === 'numeric' ? (() => {
-          const numConfig = config as NumericPropertyConfig;
-          const value = numConfig.getValue(element);
-          const t = normalize(value, numConfig);
-          const sizePct = t != null ? 15 + t * 65 : 0;
-          return (
-            <div className="relative w-full" style={{ paddingBottom: '100%' }}>
-              <div className="absolute inset-0 flex items-center justify-center">
-                {t != null && (
-                  <div
-                    className="rounded-full absolute"
-                    style={{
-                      width: `${sizePct}%`,
-                      aspectRatio: '1',
-                      backgroundColor: category?.color ?? 'hsl(var(--muted))',
-                      opacity: 0.7,
-                    }}
-                  />
-                )}
-                <span className="text-[max(0.5rem,20cqw)] font-semibold text-neutral-900 relative z-10">
+        {/* Category-colored circle that morphs from full square to radius-sized circle */}
+        <motion.div
+          className="absolute rounded-full"
+          style={{
+            backgroundColor: categoryColor,
+            left: '50%',
+            top: '50%',
+            x: '-50%',
+            y: '-50%',
+          }}
+          animate={{
+            width: isRadiusMode ? `${radiusSizePct}%` : '142%', // 142% to cover corners of square
+            height: isRadiusMode ? `${radiusSizePct}%` : '142%',
+            opacity: isRadiusMode ? 0.7 : 1,
+          }}
+          transition={{ duration: 0.5, ease: 'easeInOut' }}
+        />
+
+        {/* Content layer */}
+        <div className="relative z-10 w-full h-full">
+          <AnimatePresence mode="wait">
+            {isRadiusMode ? (
+              <motion.div
+                key="radius"
+                className="flex items-center justify-center w-full h-full"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.3 }}
+              >
+                <span className="text-[max(0.5rem,20cqw)] font-semibold text-neutral-900">
                   {element.symbol}
                 </span>
-              </div>
-            </div>
-          );
-        })() : (
-        <div className="p-[8cqw] flex flex-col items-start w-full h-full">
-          <span className="text-[max(0.4rem,12cqw)] text-neutral-700 leading-tight">
-            {element.number}
-          </span>
-          <span className="text-[max(0.5rem,24cqw)] font-semibold leading-tight text-neutral-900">
-            {element.symbol}
-          </span>
-          <span className="text-[max(0.35rem,10cqw)] text-neutral-700 truncate max-w-full px-0.5 leading-tight">
-            {element.name}
-          </span>
-          <span className="text-[max(0.3rem,8cqw)] text-neutral-500 leading-tight mt-auto">
-            {element.atomic_mass.toFixed(2)}
-          </span>
+              </motion.div>
+            ) : (
+              <motion.div
+                key="default"
+                className="p-[8cqw] flex flex-col items-start w-full h-full"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.3 }}
+              >
+                <span className="text-[max(0.4rem,12cqw)] text-neutral-700 leading-tight">
+                  {element.number}
+                </span>
+                <span className="text-[max(0.5rem,24cqw)] font-semibold leading-tight text-neutral-900">
+                  {element.symbol}
+                </span>
+                <span className="text-[max(0.35rem,10cqw)] text-neutral-700 truncate max-w-full px-0.5 leading-tight">
+                  {element.name}
+                </span>
+                <span className="text-[max(0.35rem,10cqw)] text-neutral-900 leading-tight mt-auto">
+                  {element.atomic_mass.toFixed(2)}
+                </span>
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
-        )}
-      </button>
+      </motion.button>
     </div>
   );
 }
