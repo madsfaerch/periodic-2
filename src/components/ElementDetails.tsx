@@ -1,5 +1,5 @@
 import { X } from 'lucide-react';
-import { useState, useCallback, useMemo } from 'react';
+import { useState, useMemo } from 'react';
 import { getCategoryForElement } from '@/data/categories';
 import { usePeriodicTableStore } from '@/store';
 import { OrbitalViewer } from '@/components/orbital';
