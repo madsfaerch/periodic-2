@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import { motion, AnimatePresence } from 'motion/react';
+import { motion } from 'motion/react';
 import type { Element as ElementType } from '@/data';
 import { getCategoryForElement } from '@/data/categories';
 import { getElementPropertyColor, propertyMap, normalize } from '@/lib/heatmap';
@@ -73,6 +73,7 @@ export function Element({ element, className }: ElementProps) {
     >
       <motion.button
         type="button"
+        initial={false}
         className={cn(
           'relative flex flex-col items-start justify-center w-full h-full cursor-pointer overflow-hidden',
           'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
@@ -99,6 +100,7 @@ export function Element({ element, className }: ElementProps) {
         {/* Category-colored circle that morphs from full square to radius-sized circle */}
         <motion.div
           className="absolute rounded-full"
+          initial={false}
           style={{
             backgroundColor: categoryColor,
             left: '50%',
@@ -107,53 +109,44 @@ export function Element({ element, className }: ElementProps) {
             y: '-50%',
           }}
           animate={{
-            width: isRadiusMode ? `${radiusSizePct}%` : '142%', // 142% to cover corners of square
+            width: isRadiusMode ? `${radiusSizePct}%` : '142%',
             height: isRadiusMode ? `${radiusSizePct}%` : '142%',
             opacity: isRadiusMode ? 0.7 : 1,
           }}
           transition={{ duration: 0.5, ease: 'linear' }}
         />
 
-        {/* Content layer */}
+        {/* Content layer — both layouts rendered, opacity crossfade */}
         <div className="relative z-10 w-full h-full">
-          <AnimatePresence mode="wait">
-            {isRadiusMode ? (
-              <motion.div
-                key="radius"
-                className="flex items-center justify-center w-full h-full"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                transition={{ duration: 0.3 }}
-              >
-                <span className="text-[max(0.5rem,20cqw)] font-semibold text-neutral-900">
-                  {element.symbol}
-                </span>
-              </motion.div>
-            ) : (
-              <motion.div
-                key="default"
-                className="p-[8cqw] flex flex-col items-start w-full h-full"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                transition={{ duration: 0.3 }}
-              >
-                <span className="text-[max(0.4rem,12cqw)] text-neutral-700 leading-tight">
-                  {element.number}
-                </span>
-                <span className="text-[max(0.5rem,24cqw)] font-semibold leading-tight text-neutral-900">
-                  {element.symbol}
-                </span>
-                <span className="text-[max(0.35rem,10cqw)] text-neutral-700 truncate max-w-full px-0.5 leading-tight">
-                  {element.name}
-                </span>
-                <span className="text-[max(0.35rem,10cqw)] text-neutral-900 leading-tight mt-auto">
-                  {element.atomic_mass.toFixed(2)}
-                </span>
-              </motion.div>
-            )}
-          </AnimatePresence>
+          <motion.div
+            className="absolute inset-0 flex items-center justify-center"
+            initial={false}
+            animate={{ opacity: isRadiusMode ? 1 : 0 }}
+            transition={{ duration: 0.25 }}
+          >
+            <span className="text-[max(0.5rem,20cqw)] font-semibold text-neutral-900">
+              {element.symbol}
+            </span>
+          </motion.div>
+          <motion.div
+            className="absolute inset-0 p-[8cqw] flex flex-col items-start"
+            initial={false}
+            animate={{ opacity: isRadiusMode ? 0 : 1 }}
+            transition={{ duration: 0.25 }}
+          >
+            <span className="text-[max(0.4rem,12cqw)] text-neutral-700 leading-tight">
+              {element.number}
+            </span>
+            <span className="text-[max(0.5rem,24cqw)] font-semibold leading-tight text-neutral-900">
+              {element.symbol}
+            </span>
+            <span className="text-[max(0.35rem,10cqw)] text-neutral-700 truncate max-w-full px-0.5 leading-tight">
+              {element.name}
+            </span>
+            <span className="text-[max(0.35rem,10cqw)] text-neutral-900 leading-tight mt-auto">
+              {element.atomic_mass.toFixed(2)}
+            </span>
+          </motion.div>
         </div>
       </motion.button>
     </div>
