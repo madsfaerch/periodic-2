@@ -16,16 +16,12 @@ interface ElementProps {
 export function Element({ element, className }: ElementProps) {
   const isSelected = usePeriodicTableStore((s) => s.selectedElement?.number === element.number);
   const isHovered = usePeriodicTableStore((s) => s.hoveredElement?.number === element.number);
-  const hoveredGroup = usePeriodicTableStore((s) => s.hoveredGroup);
-  const hoveredPeriod = usePeriodicTableStore((s) => s.hoveredPeriod);
   const activeProperty = usePeriodicTableStore((s) => s.activeProperty);
   const selectElement = usePeriodicTableStore((s) => s.selectElement);
   const setHoveredElement = usePeriodicTableStore((s) => s.setHoveredElement);
 
   const category = getCategoryForElement(element.category);
   const categoryColor = category?.color ?? 'hsl(var(--muted))';
-  const isInHoveredGroup = !hoveredGroup || element.group === hoveredGroup;
-  const isInHoveredPeriod = !hoveredPeriod || element.period === hoveredPeriod;
 
   // Active property coloring
   const propertyBg = activeProperty
@@ -55,11 +51,7 @@ export function Element({ element, className }: ElementProps) {
     isGroupDimmed = selectedGroup !== thisGroup;
   }
 
-  const isDimmed =
-    hasNoValue ||
-    isGroupDimmed ||
-    (hoveredGroup && !isInHoveredGroup) ||
-    (hoveredPeriod && !isInHoveredPeriod);
+  const isDimmed = hasNoValue || isGroupDimmed;
 
   // Background: in radius mode, animate from category color to transparent
   const bgColor = isRadiusMode
@@ -72,6 +64,8 @@ export function Element({ element, className }: ElementProps) {
         '@container flex flex-col items-center justify-center p-0.5 aspect-square',
         className,
       )}
+      data-group={element.group}
+      data-period={element.period}
       style={{
         gridColumn: element.xpos,
         gridRow: element.ypos,
