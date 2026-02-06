@@ -1,5 +1,4 @@
 import { useMemo } from 'react';
-import { motion } from 'motion/react';
 import type { Element as ElementType } from '@/data';
 import { getCategoryForElement } from '@/data/categories';
 import { getElementPropertyColor, propertyMap, normalize } from '@/lib/heatmap';
@@ -33,7 +32,7 @@ export function Element({ element, className }: ElementProps) {
 
   const isRadiusMode = !!(activeProperty && RADIUS_KEYS.has(activeProperty));
 
-  // Radius circle size
+  // Radius circle size (percentage of cell)
   const radiusSizePct = useMemo(() => {
     if (!isRadiusMode || config?.kind !== 'numeric') return 0;
     const numConfig = config as NumericPropertyConfig;
@@ -53,10 +52,16 @@ export function Element({ element, className }: ElementProps) {
 
   const isDimmed = hasNoValue || isGroupDimmed;
 
-  // Background: in radius mode, animate from category color to transparent
-  const bgColor = isRadiusMode
-    ? 'transparent'
-    : propertyBg ?? categoryColor;
+  const shared = {
+    onClick: () => selectElement(element),
+    onMouseEnter: () => setHoveredElement(element),
+    onMouseLeave: () => setHoveredElement(null),
+    onFocus: () => setHoveredElement(element),
+    onBlur: () => setHoveredElement(null),
+    'aria-pressed': isSelected,
+    'aria-label': `${element.name}, symbol ${element.symbol}, atomic number ${element.number}, ${element.category}`,
+    'data-element': element.number,
+  } as const;
 
   return (
     <div
@@ -71,69 +76,48 @@ export function Element({ element, className }: ElementProps) {
         gridRow: element.ypos,
       }}
     >
-      <motion.button
-        type="button"
-        initial={false}
-        className={cn(
-          'relative flex flex-col items-start justify-center w-full h-full cursor-pointer overflow-hidden',
-          'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
-          {
-            'ring-2 ring-ring': isSelected,
-            'ring-1 ring-ring/50': isHovered && !isSelected,
-            'opacity-20': isDimmed,
-          },
-        )}
-        animate={{
-          backgroundColor: bgColor,
-          borderRadius: isRadiusMode ? '50%' : '2px',
-        }}
-        transition={{ duration: 0.5, ease: 'linear' }}
-        onClick={() => selectElement(element)}
-        onMouseEnter={() => setHoveredElement(element)}
-        onMouseLeave={() => setHoveredElement(null)}
-        onFocus={() => setHoveredElement(element)}
-        onBlur={() => setHoveredElement(null)}
-        aria-pressed={isSelected}
-        aria-label={`${element.name}, symbol ${element.symbol}, atomic number ${element.number}, ${element.category}`}
-        data-element={element.number}
-      >
-        {/* Category-colored circle that morphs from full square to radius-sized circle */}
-        <motion.div
-          className="absolute rounded-full"
-          initial={false}
-          style={{
-            backgroundColor: categoryColor,
-            left: '50%',
-            top: '50%',
-            x: '-50%',
-            y: '-50%',
-          }}
-          animate={{
-            width: isRadiusMode ? `${radiusSizePct}%` : '142%',
-            height: isRadiusMode ? `${radiusSizePct}%` : '142%',
-            opacity: isRadiusMode ? 0.7 : 1,
-          }}
-          transition={{ duration: 0.5, ease: 'linear' }}
-        />
-
-        {/* Content layer — both layouts rendered, opacity crossfade */}
-        <div className="relative z-10 w-full h-full">
-          <motion.div
-            className="absolute inset-0 flex items-center justify-center"
-            initial={false}
-            animate={{ opacity: isRadiusMode ? 1 : 0 }}
-            transition={{ duration: 0.25 }}
+      {isRadiusMode ? (
+        <button
+          type="button"
+          className={cn(
+            'flex items-center justify-center w-full h-full cursor-pointer rounded-none bg-transparent',
+            'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
+            { 'opacity-20': isDimmed },
+          )}
+          {...shared}
+        >
+          <div
+            className="rounded-full flex items-center justify-center"
+            style={{
+              width: `${radiusSizePct}%`,
+              height: `${radiusSizePct}%`,
+              backgroundColor: categoryColor,
+              opacity: 0.7,
+            }}
           >
-            <span className="text-[max(0.5rem,20cqw)] font-semibold text-neutral-900">
-              {element.symbol}
-            </span>
-          </motion.div>
-          <motion.div
-            className="absolute inset-0 p-[8cqw] flex flex-col items-start"
-            initial={false}
-            animate={{ opacity: isRadiusMode ? 0 : 1 }}
-            transition={{ duration: 0.25 }}
-          >
+            {radiusSizePct > 25 && (
+              <span className="text-[max(0.4rem,14cqw)] font-semibold text-neutral-900">
+                {element.symbol}
+              </span>
+            )}
+          </div>
+        </button>
+      ) : (
+        <button
+          type="button"
+          className={cn(
+            'relative flex flex-col items-start justify-center w-full h-full cursor-pointer rounded-[2px] overflow-hidden',
+            'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
+            {
+              'ring-2 ring-ring': isSelected,
+              'ring-1 ring-ring/50': isHovered && !isSelected,
+              'opacity-20': isDimmed,
+            },
+          )}
+          style={{ backgroundColor: propertyBg ?? categoryColor }}
+          {...shared}
+        >
+          <div className="p-[8cqw] flex flex-col items-start w-full h-full">
             <span className="text-[max(0.4rem,12cqw)] text-neutral-700 leading-tight">
               {element.number}
             </span>
@@ -146,9 +130,9 @@ export function Element({ element, className }: ElementProps) {
             <span className="text-[max(0.35rem,10cqw)] text-neutral-900 leading-tight mt-auto">
               {element.atomic_mass.toFixed(2)}
             </span>
-          </motion.div>
-        </div>
-      </motion.button>
+          </div>
+        </button>
+      )}
     </div>
   );
 }
