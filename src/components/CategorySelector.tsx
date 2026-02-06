@@ -10,7 +10,7 @@ import { cn } from '@/lib/utils';
 import { usePeriodicTableStore } from '@/store';
 
 export function CategorySelector() {
-  const { highlightedCategory, setHighlightedCategory, setHoveredCategory } =
+  const { highlightedCategory, setHighlightedCategory } =
     usePeriodicTableStore();
 
   return (
@@ -38,13 +38,11 @@ export function CategorySelector() {
                     backgroundColor: isActive ? category.color : undefined,
                   }}
                   onMouseEnter={(e) => {
-                    setHoveredCategory(category.id);
                     if (!isActive) {
                       e.currentTarget.style.backgroundColor = category.color;
                     }
                   }}
                   onMouseLeave={(e) => {
-                    setHoveredCategory(null);
                     if (!isActive) {
                       e.currentTarget.style.backgroundColor = '';
                     }

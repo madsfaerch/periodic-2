@@ -16,7 +16,6 @@ interface PeriodicTableState {
   setHoveredPeriod: (period: number | null) => void;
   setActiveProperty: (property: string | null) => void;
   setHighlightedCategory: (category: string | null) => void;
-  setHoveredCategory: (category: string | null) => void;
   setViewMode: (mode: 'grid' | 'list') => void;
   toggleSortDirection: () => void;
 }
@@ -45,7 +44,6 @@ export const usePeriodicTableStore = create<PeriodicTableState>((set) => ({
   setHoveredPeriod: (period) => set({ hoveredPeriod: period }),
   setActiveProperty: (property) => set({ activeProperty: property }),
   setHighlightedCategory: (category) => set({ highlightedCategory: category }),
-  setHoveredCategory: (_category) => {},
   setViewMode: (mode) => set({ viewMode: mode }),
   toggleSortDirection: () =>
     set((s) => ({ sortDirection: s.sortDirection === 'asc' ? 'desc' : 'asc' })),

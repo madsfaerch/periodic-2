@@ -136,9 +136,6 @@ export const allProperties: PropertyConfig[] = [
 
 export const propertyMap = new Map(allProperties.map((p) => [p.key, p]));
 
-// Legacy alias
-export const heatmapPropertyMap = propertyMap;
-
 // --- Group colors ---
 
 const GROUP_PALETTE = [
@@ -284,6 +281,3 @@ export function getElementPropertyColor(
   if (t == null) return null;
   return heatmapColor(t);
 }
-
-// Legacy alias
-export const getElementHeatmapColor = getElementPropertyColor;

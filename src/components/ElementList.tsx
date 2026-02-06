@@ -5,9 +5,8 @@ import { propertyMap, getGroupColor, normalize } from '@/lib/heatmap';
 import type { GroupPropertyConfig, NumericPropertyConfig } from '@/lib/heatmap';
 import { usePeriodicTableStore } from '@/store';
 import { cn } from '@/lib/utils';
+import { RADIUS_KEYS } from '@/lib/constants';
 import { ArrowUpDown } from 'lucide-react';
-
-const RADIUS_KEYS = new Set(['atomic_radius', 'covalent_radius', 'van_der_waals_radius']);
 
 export function ElementList() {
   const { selectedElement, selectElement, activeProperty, sortDirection, toggleSortDirection } =

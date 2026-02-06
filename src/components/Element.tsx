@@ -6,8 +6,7 @@ import { getElementPropertyColor, propertyMap, normalize } from '@/lib/heatmap';
 import type { NumericPropertyConfig } from '@/lib/heatmap';
 import { cn } from '@/lib/utils';
 import { usePeriodicTableStore } from '@/store';
-
-const RADIUS_KEYS = new Set(['atomic_radius', 'covalent_radius', 'van_der_waals_radius']);
+import { RADIUS_KEYS } from '@/lib/constants';
 
 interface ElementProps {
   element: ElementType;
@@ -15,17 +14,13 @@ interface ElementProps {
 }
 
 export function Element({ element, className }: ElementProps) {
-  const {
-    selectedElement,
-    hoveredElement,
-    hoveredGroup,
-    hoveredPeriod,
-    activeProperty,
-    selectElement,
-    setHoveredElement,
-  } = usePeriodicTableStore();
-  const isSelected = selectedElement?.number === element.number;
-  const isHovered = hoveredElement?.number === element.number;
+  const isSelected = usePeriodicTableStore((s) => s.selectedElement?.number === element.number);
+  const isHovered = usePeriodicTableStore((s) => s.hoveredElement?.number === element.number);
+  const hoveredGroup = usePeriodicTableStore((s) => s.hoveredGroup);
+  const hoveredPeriod = usePeriodicTableStore((s) => s.hoveredPeriod);
+  const activeProperty = usePeriodicTableStore((s) => s.activeProperty);
+  const selectElement = usePeriodicTableStore((s) => s.selectElement);
+  const setHoveredElement = usePeriodicTableStore((s) => s.setHoveredElement);
 
   const category = getCategoryForElement(element.category);
   const categoryColor = category?.color ?? 'hsl(var(--muted))';
@@ -52,10 +47,10 @@ export function Element({ element, className }: ElementProps) {
   }, [isRadiusMode, config, element]);
 
   // Highlight matching group value when a group property is active and an element is selected
-  const selectedElement_ = usePeriodicTableStore((s) => s.selectedElement);
+  const selectedElementForGroup = usePeriodicTableStore((s) => s.selectedElement);
   let isGroupDimmed = false;
-  if (config?.kind === 'group' && selectedElement_) {
-    const selectedGroup = config.getGroup(selectedElement_);
+  if (config?.kind === 'group' && selectedElementForGroup) {
+    const selectedGroup = config.getGroup(selectedElementForGroup);
     const thisGroup = config.getGroup(element);
     isGroupDimmed = selectedGroup !== thisGroup;
   }

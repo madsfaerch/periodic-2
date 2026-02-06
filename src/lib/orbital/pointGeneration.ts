@@ -72,18 +72,3 @@ async function loadOrbitalPoints(orbital: ValenceOrbital): Promise<OrbitalPoints
 export async function getOrbitalPoints(orbital: ValenceOrbital): Promise<OrbitalPoints> {
   return loadOrbitalPoints(orbital);
 }
-
-/**
- * Check if orbital points are cached (for sync access)
- */
-export function getOrbitalPointsCached(orbital: ValenceOrbital): OrbitalPoints | null {
-  const key = getOrbitalKey(orbital);
-  return pointCache.get(key) ?? null;
-}
-
-/**
- * Preload orbital points (call early to warm cache)
- */
-export function preloadOrbitalPoints(orbital: ValenceOrbital): void {
-  loadOrbitalPoints(orbital);
-}

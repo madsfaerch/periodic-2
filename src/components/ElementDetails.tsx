@@ -1,11 +1,14 @@
 import { X } from 'lucide-react';
-import { useState, useMemo } from 'react';
+import React, { useState, useMemo, lazy, Suspense } from 'react';
 import { getCategoryForElement } from '@/data/categories';
 import { usePeriodicTableStore } from '@/store';
-import { OrbitalViewer } from '@/components/orbital';
 import { propertyMap } from '@/lib/heatmap';
 import { cn } from '@/lib/utils';
 import { parseValenceOrbital, getOrbitalDescription } from '@/lib/orbital/orbitalParser';
+
+const OrbitalViewer = lazy(() =>
+  import('@/components/orbital/OrbitalViewer').then((m) => ({ default: m.OrbitalViewer })),
+);
 
 export function ElementDetails({ condensed = false }: { condensed?: boolean }) {
   const { selectedElement, selectElement } = usePeriodicTableStore();
@@ -60,7 +63,9 @@ export function ElementDetails({ condensed = false }: { condensed?: boolean }) {
               className="w-20 h-20 rounded-lg overflow-hidden shadow-md hover:shadow-lg transition-shadow cursor-pointer"
               aria-label="View orbital"
             >
-              <OrbitalViewer element={selectedElement} compact />
+              <Suspense fallback={<div className="w-full h-full bg-stone-100 animate-pulse" />}>
+                <OrbitalViewer element={selectedElement} compact />
+              </Suspense>
             </button>
           </div>
         </div>
@@ -91,7 +96,9 @@ export function ElementDetails({ condensed = false }: { condensed?: boolean }) {
             >
               <X className="size-6" />
             </button>
-            <OrbitalViewer element={selectedElement} className="w-full" />
+            <Suspense fallback={<div className="w-full aspect-square bg-stone-100 rounded-lg animate-pulse" />}>
+              <OrbitalViewer element={selectedElement} className="w-full" />
+            </Suspense>
             <div className="mt-3 text-center">
               <p className="text-white text-lg font-bold">
                 {selectedElement.symbol} — {selectedElement.name}
@@ -212,6 +219,16 @@ function Property({
       onClick={
         isClickable
           ? () => setActiveProperty(isActive ? null : propertyKey!)
+          : undefined
+      }
+      onKeyDown={
+        isClickable
+          ? (e: React.KeyboardEvent) => {
+              if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                setActiveProperty(isActive ? null : propertyKey!);
+              }
+            }
           : undefined
       }
       role={isClickable ? 'button' : undefined}
